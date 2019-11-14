@@ -7,7 +7,7 @@ namespace Blacksmith
 {
     public static class EnumerableExtensions
     {
-        public static IOrderedEnumerable<TSource> sortBy<TSource, TKey>(
+        public static IOrderedEnumerable<TSource> orderBy<TSource, TKey>(
             this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, OrderDirection direction)
         {
             assertNotNull(source, nameof(source));
@@ -35,7 +35,7 @@ namespace Blacksmith
                 throw new ArgumentException($"Wrong {nameof(OrderDirection)} enum value");
         }
 
-        public static IOrderedQueryable<TSource> sortBy<TSource, TKey>(
+        public static IOrderedQueryable<TSource> orderBy<TSource, TKey>(
             this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, OrderDirection direction)
         {
             assertNotNull(source, nameof(source));
@@ -118,18 +118,28 @@ namespace Blacksmith
             return whereIf<T>(items, stringIsFilled, predicate);
         }
 
-        public static IQueryable<T> paginate<T>(IQueryable<T> source, int pageSize, int page)
+        public static IQueryable<T> paginate<T>(this IQueryable<T> source, int pageSize, int page)
         {
             assertNotNull(source, nameof(source));
+
+            if (pageSize <= 0)
+                throw new ArgumentException("PageSize must be greater than zero.", nameof(pageSize));
+            if (page < 0)
+                throw new ArgumentException("Page must be greater or equal than zero.", nameof(page));
 
             return source
                 .Skip(page * pageSize)
                 .Take(pageSize);
         }
 
-        public static IEnumerable<T> paginate<T>(IEnumerable<T> source, int pageSize, int page)
+        public static IEnumerable<T> paginate<T>(this IEnumerable<T> source, int pageSize, int page)
         {
             assertNotNull(source, nameof(source));
+
+            if (pageSize <= 0)
+                throw new ArgumentException("PageSize must be greater than zero.", nameof(pageSize));
+            if (page < 0)
+                throw new ArgumentException("Page must be greater or equal than zero.", nameof(page));
 
             return source
                 .Skip(page * pageSize)
@@ -139,6 +149,9 @@ namespace Blacksmith
         public static ICollection<T> push<T>(this ICollection<T> source, T item)
         {
             assertNotNull(source, nameof(source));
+
+            if (source.IsReadOnly)
+                throw new ArgumentException("Source collection is read only.", nameof(source));
 
             source.Add(item);
             return source;

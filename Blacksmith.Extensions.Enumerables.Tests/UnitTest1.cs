@@ -5,14 +5,6 @@ using System.Linq;
 
 namespace Blacksmith.Extensions.Enumerables.Tests
 {
-    public class User
-    {
-        public string Name { get; set; }
-        public int Age { get; set; }
-        public DateTime Registration { get; set; }
-        public string SurName { get; set; }
-    }
-
     [TestClass]
     public class UnitTest1
     {
@@ -21,10 +13,13 @@ namespace Blacksmith.Extensions.Enumerables.Tests
         {
             User[] sortedUsers, unsortedUsers;
 
-            unsortedUsers = getUsers().ToArray();
+            unsortedUsers = Sources
+                .getUsers()
+                .ToArray();
 
-            sortedUsers = getUsers()
-                .sortBy(u => u.Age, OrderDirection.Descendant)
+            sortedUsers = Sources
+                .getUsers()
+                .orderBy(u => u.Age, OrderDirection.Descendant)
                 .thenBy(u => u.SurName, OrderDirection.Ascendant)
                 .ToArray();
 
@@ -39,11 +34,14 @@ namespace Blacksmith.Extensions.Enumerables.Tests
         {
             User[] sortedUsers, unsortedUsers;
 
-            unsortedUsers = getUsers().ToArray();
+            unsortedUsers = Sources
+                .getUsers()
+                .ToArray();
 
-            sortedUsers = getUsers()
+            sortedUsers = Sources
+                .getUsers()
                 .AsQueryable()
-                .sortBy(u => u.Age, OrderDirection.Descendant)
+                .orderBy(u => u.Age, OrderDirection.Descendant)
                 .thenBy(u => u.SurName, OrderDirection.Ascendant)
                 .ToArray();
 
@@ -59,10 +57,13 @@ namespace Blacksmith.Extensions.Enumerables.Tests
             IEnumerable<User> users;
             IEnumerable<int> ints;
 
-            users = getUsersWithNulls()
+            users = Sources
+                .getUsersWithNulls()
                 .notNull();
 
-            ints = getInts().notNull();
+            ints = Sources
+                .getInts()
+                .notNull();
 
             Assert.AreEqual(4, users.Count());
             Assert.AreEqual(10, ints.Count());
@@ -73,7 +74,8 @@ namespace Blacksmith.Extensions.Enumerables.Tests
         {
             string[] strings;
 
-            strings = getStrings()
+            strings = Sources
+                .getStrings()
                 .notNull()
                 .trim()
                 .ToArray();
@@ -91,109 +93,144 @@ namespace Blacksmith.Extensions.Enumerables.Tests
             Assert.AreEqual("tronco", strings[1]);
         }
 
-        private static IEnumerable<User> getUsers()
+        [TestMethod]
+        public void forEach_tests()
         {
-            yield return new User //3
-            {
-                Name = "Narciso",
-                SurName = "Robles Olmos",
-                Age = 21,
-                Registration = new DateTime(2009, 8, 13),
-            };
+            int totalAge;
 
-            yield return new User //1
-            {
-                Name = "Rosa",
-                SurName = "De la huerta Castaños",
-                Age = 55,
-                Registration = new DateTime(2011, 8, 13),
-            };
+            totalAge = 0;
 
-            yield return new User //0
-            {
-                Name = "Florencio",
-                SurName = "Céspedes Perales",
-                Age = 55,
-                Registration = new DateTime(2015, 8, 13),
-            };
+            //I know, we can achieve this by using linq Sum<T> extension method,
+            //but, this is for to test the forEach method.
+            Sources
+                .getUsers()
+                .forEach(u => totalAge += u.Age);
 
-            yield return new User //2
-            {
-                Name = "Florencio",
-                SurName = "Campos Huertas",
-                Age = 34,
-                Registration = new DateTime(2015, 8, 13),
-            };
+            Assert.AreEqual(165, totalAge);
         }
 
-        private static IEnumerable<User> getUsersWithNulls()
+        [TestMethod]
+        public void enumerable_whereIf_tests()
         {
-            yield return new User
-            {
-                Name = "Narciso",
-                SurName = "Robles Olmos",
-                Age = 21,
-                Registration = new DateTime(2009, 8, 13),
-            };
+            IEnumerable<User> users;
 
-            yield return null;
+            users = Sources.getUsers()
+                .whereIf(true, u => u.Age > 30)
+                .whereIf(false, u => u.Age < 50);
 
-            yield return new User
-            {
-                Name = "Rosa",
-                SurName = "De la huerta Castaños",
-                Age = 55,
-                Registration = new DateTime(2011, 8, 13),
-            };
+            Assert.AreEqual(3, users.Count());
 
-            yield return null;
+            users = users.whereIfStringIsFilled(null, u => u.Age < 50);
+            Assert.AreEqual(3, users.Count());
 
-            yield return new User
-            {
-                Name = "Florencio",
-                SurName = "Céspedes Perales",
-                Age = 55,
-                Registration = new DateTime(2015, 8, 13),
-            };
+            users = users.whereIfStringIsFilled("", u => u.Age < 50);
+            Assert.AreEqual(3, users.Count());
 
-            yield return new User
-            {
-                Name = "Florencio",
-                SurName = "Campos Huertas",
-                Age = 34,
-                Registration = new DateTime(2015, 8, 13),
-            };
-
-            yield return null;
-            yield return null;
-            yield return null;
-            yield return null;
+            users = users.whereIfStringIsFilled("pepe", u => u.Age < 50);
+            Assert.AreEqual(1, users.Count());
         }
 
-        private static IEnumerable<int> getInts()
+        [TestMethod]
+        public void queryable_whereIf_tests()
         {
-            yield return 1;
-            yield return 2;
-            yield return 3;
-            yield return 5;
-            yield return 8;
-            yield return 13;
-            yield return 21;
-            yield return 34;
-            yield return 55;
-            yield return 89;
+            IQueryable<User> users;
+
+            users = Sources
+                .getUsers()
+                .AsQueryable()
+                .whereIf(true, u => u.Age > 30)
+                .whereIf(false, u => u.Age < 50);
+
+            Assert.AreEqual(3, users.Count());
+
+            users = users.whereIfStringIsFilled(null, u => u.Age < 50);
+            Assert.AreEqual(3, users.Count());
+
+            users = users.whereIfStringIsFilled("", u => u.Age < 50);
+            Assert.AreEqual(3, users.Count());
+
+            users = users.whereIfStringIsFilled("pepe", u => u.Age < 50);
+            Assert.AreEqual(1, users.Count());
         }
 
-        private static IEnumerable<string> getStrings()
+        [TestMethod]
+        public void push_tests()
         {
-            yield return "";
-            yield return "";
-            yield return "pepe ";
-            yield return null;
-            yield return "";
-            yield return " tronco    ";
-            yield return null;
-            yield return "";
+            IList<User> users;
+
+            users = Sources.getUsers().ToList();
+
+            users.push(new User
+            {
+                Age = 89,
+                Name = "Pepe",
+                SurName = "Fernandez González",
+                Registration = new DateTime(2019, 1, 1),
+            });
+
+            Assert.AreEqual(5, users.Count);
+            Assert.ThrowsException<ArgumentException>(() => Sources.getInts().ToArray().push(4));
+        }
+
+        [TestMethod]
+        public void enumerable_paginate_tests()
+        {
+            IEnumerable<User> orderedUsers;
+            User[] users;
+
+            orderedUsers = Sources
+                .getUsers()
+                .orderBy(u => u.Age, OrderDirection.Ascendant)
+                .thenBy(u => u.Registration, OrderDirection.Ascendant);
+
+            users = orderedUsers
+                .paginate(2, 0)
+                .ToArray();
+
+            Assert.AreEqual(2, users.Length);
+            Assert.AreEqual("Narciso", users[0].Name);
+            Assert.AreEqual("Florencio", users[1].Name);
+
+            users = orderedUsers
+                .paginate(2, 1)
+                .ToArray();
+
+            Assert.AreEqual(2, users.Length);
+            Assert.AreEqual("Rosa", users[0].Name);
+            Assert.AreEqual("Florencio", users[1].Name);
+
+            Assert.ThrowsException<ArgumentException>(() => orderedUsers.paginate(0, 2).ToArray());
+        }
+
+        [TestMethod]
+        public void queryable_paginate_tests()
+        {
+            IQueryable<User> orderedUsers;
+            User[] users;
+
+            orderedUsers = Sources
+                .getUsers()
+                .AsQueryable()
+                .orderBy(u => u.Age, OrderDirection.Ascendant)
+                .thenBy(u => u.Registration, OrderDirection.Ascendant);
+
+            users = orderedUsers
+                .paginate(2, 0)
+                .ToArray();
+
+            Assert.AreEqual(2, users.Length);
+            Assert.AreEqual("Narciso", users[0].Name);
+            Assert.AreEqual("Florencio", users[1].Name);
+
+            users = orderedUsers
+                .paginate(2, 1)
+                .ToArray();
+
+            Assert.AreEqual(2, users.Length);
+            Assert.AreEqual("Rosa", users[0].Name);
+            Assert.AreEqual("Florencio", users[1].Name);
+
+            Assert.ThrowsException<ArgumentException>(() => orderedUsers.paginate(0, 2).ToArray());
         }
     }
 }
