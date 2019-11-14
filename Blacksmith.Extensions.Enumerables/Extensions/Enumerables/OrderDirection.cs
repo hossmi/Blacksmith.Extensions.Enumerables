@@ -1,4 +1,4 @@
-﻿namespace Blacksmith
+﻿namespace Blacksmith.Extensions.Enumerables
 {
     public enum OrderDirection
     {
