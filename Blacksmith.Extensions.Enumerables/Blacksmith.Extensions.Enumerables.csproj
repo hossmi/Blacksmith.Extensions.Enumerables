@@ -4,17 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Blacksmith</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Description>Useful enumerable and queryable extension methods.</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
     <PackageProjectUrl>https://github.com/hossmi/Blacksmith.Extensions.Enumerables</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hossmi/Blacksmith.Extensions.Enumerables</RepositoryUrl>
     <PackageTags>extensions enumerables queryables</PackageTags>
     <Authors>hossmi</Authors>
-    <PackageReleaseNotes>seet namespace to Blacksmith.Extensions.Enumerables</PackageReleaseNotes>
+    <PackageReleaseNotes>Add enumerables stringify extension method</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
