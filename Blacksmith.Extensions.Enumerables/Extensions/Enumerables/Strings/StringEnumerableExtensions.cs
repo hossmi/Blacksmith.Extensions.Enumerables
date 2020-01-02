@@ -13,6 +13,8 @@ namespace Blacksmith.Extensions.Enumerables.Strings
             , string separator = DEFAULT_STRINGIFY_SEPARATOR
             , bool skipEmptyItems = true)
         {
+            selectorFunction = selectorFunction ?? prv_toString<T>;
+
             return prv_stringify(items, selectorFunction, separator, skipEmptyItems);
         }
 
@@ -20,10 +22,10 @@ namespace Blacksmith.Extensions.Enumerables.Strings
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
+            if (selectorFunction is null)
+                throw new ArgumentNullException(nameof(selectorFunction));
             if (separator == null)
                 throw new ArgumentNullException(nameof(separator));
-
-            selectorFunction = selectorFunction ?? prv_toString<T>;
 
             return items
                 .Select(selectorFunction)
@@ -40,11 +42,6 @@ namespace Blacksmith.Extensions.Enumerables.Strings
         private static string prv_toString<T>(T item)
         {
             return item?.ToString();
-        }
-
-        private static string prv_nulltoString(string item)
-        {
-            return item;
         }
     }
 }
